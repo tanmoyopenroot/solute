@@ -5,11 +5,15 @@
     "postinstall": "npm run bootstrap",
     "clean": "lerna run clean",
     "build": "lerna run build",
-    "pub": "lerna publish"
+    "pub": "lerna publish",
+    "test": "lerna run test"
   },
   "devDependencies": {
+    "@types/jest": "^25.2.3",
     "lerna": "~3.14.0",
     "rimraf": "~3.0.2",
+    "jest": "^26.0.1",
+    "ts-jest": "^26.1.0",
     "typescript": "~3.4.5"
   }
 }

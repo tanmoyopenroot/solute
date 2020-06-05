@@ -4,16 +4,6 @@
     "source.fixAll.eslint": true
   },
   "eslint.validate": ["javascript", "typescript"],
-  "editor.formatOnSave": true,
-  "[javascript]": {
-    "editor.formatOnSave": false
-  },
-  "[typescript]": {
-    "editor.formatOnSave": false
-  },
-  "[markdown]": {
-    "editor.formatOnSave": false
-  },
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
