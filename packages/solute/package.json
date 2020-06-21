@@ -17,13 +17,15 @@
   },
   "devDependencies": {
     "@types/acorn": "^4.0.5",
+    "@types/estree-jsx": "0.0.0",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
     "@typescript-eslint/parser": "^3.1.0",
-    "rimraf": "~3.0.2",
     "acorn": "^7.2.0",
     "acorn-jsx": "^5.2.0",
-    "acorn-walk": "^7.1.1",
+    "code-red": "^0.1.2",
     "eslint": "^7.1.0",
+    "estree-walker": "^2.0.1",
+    "rimraf": "~3.0.2",
     "typescript": "~3.4.5"
   }
 }
