@@ -1,6 +1,7 @@
 import { x, b } from 'code-red';
 import { BaseNode, Expression, ConditionalExpression } from 'estree-jsx';
 
+import Block from '../block';
 import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
@@ -25,6 +26,16 @@ export default class ConditionalExpressionElement extends BaseElement {
     this.elseBlockFunction = createVariable('createIfBlock');
   }
 
+  public generateConsequentBlock(): BaseNode[] {
+    const { consequent } = this.node;
+    return new Block(consequent).generate(this.ifBlockFunction);
+  }
+
+  public generateAlternateBlock(): BaseNode[] {
+    const { alternate } = this.node;
+    return new Block(alternate).generate(this.elseBlockFunction);
+  }
+
   private attachVariable() {
     Reflect.defineProperty(
       this.node,
@@ -42,7 +53,7 @@ export default class ConditionalExpressionElement extends BaseElement {
     const { test } = this.node;
 
     return b`
-      ${this.variable} = ${test} ? ${this.ifBlockFunction} : ${this.elseBlockFunction}();
+      ${this.variable} = ${test} ? ${this.ifBlockFunction}() : ${this.elseBlockFunction}();
       ${this.variable} && ${this.variable}.create.call(this);
     `;
   }
