@@ -2,38 +2,42 @@ import {
   BaseNode,
   JSXElement,
   JSXExpressionContainer,
-  Expression,
 } from 'estree-jsx';
 
 import {
+  BaseElement,
+  BaseExpressionElement,
   TextElement,
   TagElement,
   LogicalExpressionElement,
-  // ConditionalExpressionElement,
+  ConditionalExpressionElement,
+  CallExpressionElement,
 } from '../elements';
-import { b } from 'code-red';
+import Builder from './builder';
 
-export default class Fragment {
-  public chunks: {
-		body: BaseNode[];
-		declarations: BaseNode[];
-		create: BaseNode[];
-		mount: Expression[];
-		update: Expression[];
-		destroy: Expression[];
-	};
+export default class Block {
+  private builder: Builder;
 
   constructor(node: BaseNode) {
-    this.chunks = {
-      body: [],
-			declarations: [],
-			create: [],
-			mount: [],
-			update: [],
-			destroy: [],
-    };
-    
+    this.builder = new Builder();
     this.create(node);
+  }
+
+  private nodeBuilder(element: BaseElement, parent: BaseNode) {
+    const declarations = element.generateDelcaration();
+    const create = element.generateCreate();
+    const mount = element.generateMount(parent);
+
+    this.builder.addToDeclaration(declarations);
+    this.builder.addToCreate(create);
+    this.builder.addToMount(mount);
+  }
+
+  private expressionBuilder(element: BaseExpressionElement, parent: BaseNode) {
+    const block = element.generateBody();
+
+    this.builder.addToBody(block);
+    this.nodeBuilder(element, parent);
   }
 
   private create(node: BaseNode, parent?: BaseNode): void {
@@ -45,13 +49,7 @@ export default class Fragment {
 
       if (name.type === 'JSXIdentifier') {
         const element = new TagElement(node, name.name);
-        const declarations = element.generateDelcaration();
-        const create = element.generateCreate();
-        const mount = element.generateMount(parent);
-
-        this.addToDeclaration(declarations);
-        this.addToCreate(create);
-        this.addToMount(mount);
+        this.nodeBuilder(element, parent);
 
         children.forEach(child => {
           switch (child.type) {
@@ -63,13 +61,7 @@ export default class Fragment {
   
             case 'JSXText': {
               const element = new TextElement(child);
-              const declarations = element.generateDelcaration();
-              const create = element.generateCreate();
-              const mount = element.generateMount(node);
-      
-              this.addToDeclaration(declarations);
-              this.addToCreate(create);
-              this.addToMount(mount);
+              this.nodeBuilder(element, node);
 
               break;
             }
@@ -81,46 +73,33 @@ export default class Fragment {
                 case 'Identifier': 
                 case 'MemberExpression': {
                   const element = new TextElement(expression);
-                  const declarations = element.generateDelcaration();
-                  const create = element.generateCreate();
-                  const mount = element.generateMount(node);
-          
-                  this.addToDeclaration(declarations);
-                  this.addToCreate(create);
-                  this.addToMount(mount);
+                  this.nodeBuilder(element, node);
 
                   break;
                 }
 
                 case 'LogicalExpression': {
                   const element = new LogicalExpressionElement(expression);
-                  const declarations = element.generateDelcaration();
-                  const create = element.generateCreate();
-                  const mount = element.generateMount(node);
-                  const block = element.generateConditionalBlock();
-
-                  this.addToBody(block);
-                  this.addToDeclaration(declarations);
-                  this.addToCreate(create);
-                  this.addToMount(mount);
+                  this.expressionBuilder(element, node);
 
                   break;
                 }
 
-                // case 'ConditionalExpression': {
-                //   const element = new ConditionalExpressionElement(child);
-                //   const declarations = element.generateDelcaration();
-                //   const create = element.generateCreate();
-                //   const mount = element.generateMount(node);
+                case 'ConditionalExpression': {
+                  const element = new ConditionalExpressionElement(expression);
+                  this.expressionBuilder(element, node);
 
-                //   this.addToDeclaration(declarations);
-                //   this.addToCreate(create);
-                //   this.addToMount(mount);
-
-                //   break;
-                // }
+                  break;
+                }
 
                 case 'CallExpression': {
+                  const { callee } = expression;
+
+                  if (callee.type === 'MemberExpression') {
+                    const element = new CallExpressionElement(expression);
+                    this.expressionBuilder(element, node);
+                  }
+
                   break;
                 }
               }
@@ -134,40 +113,7 @@ export default class Fragment {
     }
   }
 
-  private addToBody(code: BaseNode[]): void {
-    this.chunks.body.push(...code);
-  }
-
-  private addToDeclaration(code: BaseNode): void {
-    this.chunks.declarations.push(code);
-  }
-
-  private addToCreate(code: BaseNode[]): void {
-    this.chunks.create.push(...code);
-  }
-
-  private addToMount(code: Expression): void {
-    this.chunks.mount.push(code);
-  }
-
   public generate(name: string): BaseNode[] {
-    const block =  b`
-      ${this.chunks.body.map(data => data)}
-
-      const ${name} = () => {
-        ${this.chunks.declarations.map(data => data)}
-
-        return {
-          create() {
-            ${this.chunks.create.map(data => data)}
-          },
-          mount() {
-            ${this.chunks.mount.map(data => data)}
-          },
-        }
-      };
-    `;
-
-    return block;
+    return this.builder.generate(name);
   }
 }
