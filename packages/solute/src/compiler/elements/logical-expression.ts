@@ -2,10 +2,10 @@ import { x, b } from 'code-red';
 import { BaseNode, Expression, LogicalExpression } from 'estree-jsx';
 
 import Block from '../block';
-import BaseElement from './base-element';
+import BaseExpressionElement from './base-expression-element';
 import createVariable from '../utils/create-variable';
 
-export default class LogicalExpressionElement extends BaseElement {
+export default class LogicalExpressionElement extends BaseExpressionElement {
   private node: LogicalExpression;
   private blockFunction: string;
   private variable: string;
@@ -32,7 +32,7 @@ export default class LogicalExpressionElement extends BaseElement {
     );
   }
 
-  public generateConditionalBlock(): BaseNode[] {
+  public generateBody(): BaseNode[] {
     const { right } = this.node;
     return new Block(right).generate(this.blockFunction);
   }
