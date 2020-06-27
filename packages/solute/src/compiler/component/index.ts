@@ -1,11 +1,5 @@
 import { walk } from 'estree-walker';
-import {
-  BaseNode,
-  ObjectExpression,
-  FunctionExpression,
-  ExportDefaultDeclaration,
-  Expression,
-} from 'estree-jsx';
+import { BaseNode, ObjectExpression, FunctionExpression, ExportDefaultDeclaration, Expression } from 'estree-jsx';
 
 import Block from '../block';
 
@@ -29,11 +23,11 @@ export default class Component {
   private methodsAst: ObjectExpression;
   private renderAst: FunctionExpression;
   private chunks: {
-		body: Expression[];
-		state: Expression[];
-		computed: Expression[];
-		methods: Expression[];
-  }
+    body: Expression[];
+    state: Expression[];
+    computed: Expression[];
+    methods: Expression[];
+  };
   constructor(ast: BaseNode) {
     this.ast = ast;
     this.name = DEFAULT_NAME;
@@ -50,13 +44,9 @@ export default class Component {
           if (declaration.type === 'ObjectExpression') {
             declaration.properties.forEach((property) => {
               if (property.type === 'Property' && property.key.type === 'Identifier') {
-                
                 switch (property.key.name) {
                   case COMPONENT_PROPERTY.NAME:
-                    if (
-                      property.value.type === 'Literal' &&
-                      typeof property.value.value === 'string'
-                    ) {
+                    if (property.value.type === 'Literal' && typeof property.value.value === 'string') {
                       this.name = property.value.value;
                     }
                     break;
@@ -111,7 +101,7 @@ export default class Component {
     });
   }
 
-  public generate(): void {
-    const block = new Block(this.renderAst);
+  public generate(): BaseNode[] {
+    return new Block(this.renderAst).generate('createFragment');
   }
 }

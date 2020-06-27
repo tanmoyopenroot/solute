@@ -1,7 +1,4 @@
-import {
-  BaseNode,
-  Expression,
-} from 'estree-jsx';
+import { BaseNode, Expression } from 'estree-jsx';
 import { b } from 'code-red';
 
 import Chunks from './chunks';
@@ -30,18 +27,18 @@ export default class Builder {
   }
 
   public generate(name: string): BaseNode[] {
-    const block =  b`
-      ${this.chunks.body.map(data => data)}
+    const block = b`
+      ${this.chunks.body.map((data) => data)}
 
       const ${name} = () => {
-        ${this.chunks.declarations.map(data => data)}
+        ${this.chunks.declarations.map((data) => data)}
 
         return {
           create() {
-            ${this.chunks.create.map(data => data)}
+            ${this.chunks.create.map((data) => data)}
           },
           mount() {
-            ${this.chunks.mount.map(data => data)}
+            ${this.chunks.mount.map((data) => data)}
           },
         }
       };
