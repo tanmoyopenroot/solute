@@ -5,31 +5,23 @@ import Block from '../block';
 import BaseExpressionElement from './base-expression-element';
 import createVariable from '../utils/create-variable';
 
-export default class LogicalExpressionElement extends BaseExpressionElement {
-  private node: LogicalExpression;
+export default class LogicalExpressionElement extends BaseExpressionElement<LogicalExpression> {
   private blockFunction: string;
   private variable: string;
+
   constructor(node: LogicalExpression) {
-    super();
+    super(node);
 
     this.type = 'LogicalExpressionElement';
-    this.node = node;
-
-    this.generateVariable();
-    this.attachVariable();
   }
 
-  private generateVariable() {
+  protected generateVariable(): void {
     this.variable = createVariable('ifBlock');
     this.blockFunction = createVariable('createIfBlock');
   }
 
-  private attachVariable() {
-    Reflect.defineProperty(
-      this.node,
-      'variable',
-      { value: this.variable },
-    );
+  protected attachVariable(): void {
+    Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
   public generateBody(): BaseNode[] {
@@ -38,15 +30,12 @@ export default class LogicalExpressionElement extends BaseExpressionElement {
   }
 
   public generateDelcaration(): BaseNode {
-    const decalaration =  b`let ${this.variable}`;
+    const decalaration = b`let ${this.variable}`;
     return decalaration[0];
   }
 
   public generateCreate(): BaseNode[] {
-    const {
-      left,
-      operator,
-    } = this.node;
+    const { left, operator } = this.node;
 
     // Need to fix this
     // 1: Operator
@@ -54,7 +43,7 @@ export default class LogicalExpressionElement extends BaseExpressionElement {
 
     return [
       x`${this.variable} = ${left} && ${this.blockFunction}()`,
-      x`${this.variable} && ${this.variable}.create.call(this)`
+      x`${this.variable} && ${this.variable}.create.call(this)`,
     ];
   }
 

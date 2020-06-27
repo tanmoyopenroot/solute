@@ -4,36 +4,27 @@ import { x, b } from 'code-red';
 import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
-
-export default class TagElement extends BaseElement {
-  private node: BaseNode;
+export default class TagElement extends BaseElement<BaseNode> {
   private tag: string;
   private variable: string;
+
   constructor(node: BaseNode, tag: string) {
-    super();
+    super(node);
 
     this.type = 'TextElement';
-    this.node = node;
     this.tag = tag;
-
-    this.generateVariable();
-    this.attachVariable();
   }
 
-  private generateVariable() {
+  protected generateVariable(): void {
     this.variable = createVariable(`${this.tag}`);
   }
 
-  private attachVariable() {
-    Reflect.defineProperty(
-      this.node,
-      'variable',
-      { value: this.variable },
-    );
+  protected attachVariable(): void {
+    Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
   public generateDelcaration(): BaseNode {
-    const decalaration =  b`let ${this.variable}`;
+    const decalaration = b`let ${this.variable}`;
     return decalaration[0];
   }
 

@@ -1,11 +1,25 @@
 import { BaseNode, Expression } from 'estree-jsx';
 
-export default abstract class BaseElement {
-  public type: string;
+export default abstract class BaseElement<T> {
+  protected type: string;
+  protected node: T;
 
-  abstract generateDelcaration(): BaseNode;
-  abstract generateCreate(): BaseNode[];
-  abstract generateMount(parent?: BaseNode): Expression;
+  constructor(node: T) {
+    this.node = node;
+    this.init();
+  }
+
+  public abstract generateDelcaration(): BaseNode;
+  public abstract generateCreate(): BaseNode[];
+  public abstract generateMount(parent?: BaseNode): Expression;
+
+  protected abstract generateVariable(): void;
+  protected abstract attachVariable(): void;
+
+  protected init(): void {
+    this.generateVariable();
+    this.attachVariable();
+  }
 }
 
 export { BaseElement };

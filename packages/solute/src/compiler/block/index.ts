@@ -1,8 +1,4 @@
-import {
-  BaseNode,
-  JSXElement,
-  JSXExpressionContainer,
-} from 'estree-jsx';
+import { BaseNode, JSXElement, JSXExpressionContainer } from 'estree-jsx';
 
 import {
   BaseElement,
@@ -23,7 +19,7 @@ export default class Block {
     this.create(node);
   }
 
-  private nodeBuilder(element: BaseElement, parent: BaseNode) {
+  private nodeBuilder<T>(element: BaseElement<T>, parent: BaseNode) {
     const declarations = element.generateDelcaration();
     const create = element.generateCreate();
     const mount = element.generateMount(parent);
@@ -33,7 +29,7 @@ export default class Block {
     this.builder.addToMount(mount);
   }
 
-  private expressionBuilder(element: BaseExpressionElement, parent: BaseNode) {
+  private expressionBuilder<T>(element: BaseExpressionElement<T>, parent: BaseNode) {
     const block = element.generateBody();
 
     this.builder.addToBody(block);
@@ -45,32 +41,32 @@ export default class Block {
       const {
         openingElement: { name },
         children,
-      } = (node as JSXElement);
+      } = node as JSXElement;
 
       if (name.type === 'JSXIdentifier') {
         const element = new TagElement(node, name.name);
         this.nodeBuilder(element, parent);
 
-        children.forEach(child => {
+        children.forEach((child) => {
           switch (child.type) {
             case 'JSXElement': {
               this.create(child, node);
 
               break;
             }
-  
+
             case 'JSXText': {
               const element = new TextElement(child);
               this.nodeBuilder(element, node);
 
               break;
             }
-  
+
             case 'JSXExpressionContainer': {
-              const { expression } = (child as JSXExpressionContainer);
+              const { expression } = child as JSXExpressionContainer;
 
               switch (expression.type) {
-                case 'Identifier': 
+                case 'Identifier':
                 case 'MemberExpression': {
                   const element = new TextElement(expression);
                   this.nodeBuilder(element, node);

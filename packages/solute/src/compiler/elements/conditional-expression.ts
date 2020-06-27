@@ -5,22 +5,18 @@ import Block from '../block';
 import BaseExpressionElement from './base-expression-element';
 import createVariable from '../utils/create-variable';
 
-export default class ConditionalExpressionElement extends BaseExpressionElement {
-  private node: ConditionalExpression;
+export default class ConditionalExpressionElement extends BaseExpressionElement<ConditionalExpression> {
   private ifBlockFunction: string;
   private elseBlockFunction: string;
   private variable: string;
+
   constructor(node: ConditionalExpression) {
-    super();
+    super(node);
 
     this.type = 'ConditionalExpressionElement';
-    this.node = node;
-
-    this.generateVariable();
-    this.attachVariable();
   }
 
-  private generateVariable() {
+  protected generateVariable(): void {
     this.variable = createVariable('ifBlock');
     this.ifBlockFunction = createVariable('createIfBlock');
     this.elseBlockFunction = createVariable('createIfBlock');
@@ -37,22 +33,15 @@ export default class ConditionalExpressionElement extends BaseExpressionElement 
   }
 
   public generateBody(): BaseNode[] {
-    return [
-      ...this.generateConsequentBlock(),
-      ...this.generateAlternateBlock(),
-    ];
+    return [...this.generateConsequentBlock(), ...this.generateAlternateBlock()];
   }
 
-  private attachVariable() {
-    Reflect.defineProperty(
-      this.node,
-      'variable',
-      { value: this.variable },
-    );
+  protected attachVariable(): void {
+    Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
   public generateDelcaration(): BaseNode {
-    const decalaration =  b`let ${this.variable}`;
+    const decalaration = b`let ${this.variable}`;
     return decalaration[0];
   }
 
@@ -66,7 +55,7 @@ export default class ConditionalExpressionElement extends BaseExpressionElement 
   }
 
   public generateMount(parent?: BaseNode): Expression {
-    return x`append(${parent['variable'] || 'target' }, ${this.variable})`;
+    return x`append(${parent['variable'] || 'target'}, ${this.variable})`;
   }
 }
 

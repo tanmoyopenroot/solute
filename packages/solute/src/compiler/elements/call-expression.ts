@@ -6,33 +6,25 @@ import Block from '../block';
 import BaseExpressionElement from './base-expression-element';
 import createVariable from '../utils/create-variable';
 
-export default class CallExpressionElement extends BaseExpressionElement {
-  private node: CallExpression;
+export default class CallExpressionElement extends BaseExpressionElement<CallExpression> {
   private blockAst: JSXElement;
   private blockFunction: string;
   private variable: string;
+
   constructor(node: CallExpression) {
-    super();
+    super(node);
 
     this.type = 'CallExpressionElement';
-    this.node = JSON.parse(JSON.stringify(node));
-
-    this.generateVariable();
-    this.attachVariable();
     this.parserAST();
   }
 
-  private generateVariable() {
+  protected generateVariable(): void {
     this.variable = createVariable('callBlock');
     this.blockFunction = createVariable('createCallBlock');
   }
 
-  private attachVariable() {
-    Reflect.defineProperty(
-      this.node,
-      'variable',
-      { value: this.variable },
-    );
+  protected attachVariable(): void {
+    Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
   private parserAST() {
@@ -43,12 +35,9 @@ export default class CallExpressionElement extends BaseExpressionElement {
         if (node.type === 'JSXElement') {
           self.blockAst = JSON.parse(JSON.stringify(node as JSXElement));
 
-          this.replace(
-            x`${self.blockFunction}()`
-          );
+          this.replace(x`${self.blockFunction}()`);
           this.skip();
         }
-
       },
     });
   }
@@ -62,7 +51,7 @@ export default class CallExpressionElement extends BaseExpressionElement {
   }
 
   public generateDelcaration(): BaseNode {
-    const decalaration =  b`let ${this.variable}`;
+    const decalaration = b`let ${this.variable}`;
     return decalaration[0];
   }
 
@@ -72,7 +61,7 @@ export default class CallExpressionElement extends BaseExpressionElement {
 
     return [
       x`${this.variable} = Array.isArray(${object}) && ${this.blockFunction}()`,
-      x`${this.variable} && ${this.variable}.create.call(this)`
+      x`${this.variable} && ${this.variable}.create.call(this)`,
     ];
   }
 

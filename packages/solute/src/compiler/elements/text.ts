@@ -3,39 +3,31 @@ import { BaseNode, Expression, JSXText } from 'estree-jsx';
 
 import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
-export default class TextElement extends BaseElement {
-  private node: BaseNode;
+export default class TextElement extends BaseElement<BaseNode> {
   private variable: string;
+
   constructor(node: BaseNode) {
-    super();
+    super(node);
 
     this.type = 'TextElement';
-    this.node = node;
-
-    this.generateVariable();
-    this.attachVariable();
   }
 
-  private generateVariable() {
+  protected generateVariable(): void {
     this.variable = createVariable('text');
   }
 
-  private attachVariable() {
-    Reflect.defineProperty(
-      this.node,
-      'variable',
-      { value: this.variable },
-    );
+  protected attachVariable(): void {
+    Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
   public generateDelcaration(): BaseNode {
-    const decalaration =  b`let ${this.variable}`;
+    const decalaration = b`let ${this.variable}`;
     return decalaration[0];
   }
 
   public generateCreate(): BaseNode[] {
     if (this.node.type === 'JSXText') {
-      return b`${this.variable} = text('${(this.node as JSXText).raw}')`;  
+      return b`${this.variable} = text('${(this.node as JSXText).raw}')`;
     }
 
     return b`${this.variable} = text(${this.node})`;
