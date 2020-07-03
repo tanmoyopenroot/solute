@@ -14,6 +14,8 @@ export default class ConditionalExpressionElement extends BaseExpressionElement<
     super(node);
 
     this.type = 'ConditionalExpressionElement';
+    this.generateVariable();
+    this.attachVariable();
   }
 
   protected generateVariable(): void {

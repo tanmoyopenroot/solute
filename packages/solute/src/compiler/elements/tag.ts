@@ -13,6 +13,8 @@ export default class TagElement extends BaseElement<BaseNode> {
 
     this.type = 'TextElement';
     this.tag = tag;
+    this.generateVariable();
+    this.attachVariable();
   }
 
   protected generateVariable(): void {
@@ -29,7 +31,7 @@ export default class TagElement extends BaseElement<BaseNode> {
   }
 
   public generateCreate(): BaseNode[] {
-    return b`${this.variable} = createElement(${this.tag})`;
+    return b`${this.variable} = createElement('${this.tag}')`;
   }
 
   public generateMount(parent?: BaseNode): Expression {

@@ -15,6 +15,8 @@ export default class CallExpressionElement extends BaseExpressionElement<CallExp
     super(node);
 
     this.type = 'CallExpressionElement';
+    this.generateVariable();
+    this.attachVariable();
     this.parserAST();
   }
 

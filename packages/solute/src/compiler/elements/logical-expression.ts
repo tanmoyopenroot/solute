@@ -13,6 +13,8 @@ export default class LogicalExpressionElement extends BaseExpressionElement<Logi
     super(node);
 
     this.type = 'LogicalExpressionElement';
+    this.generateVariable();
+    this.attachVariable();
   }
 
   protected generateVariable(): void {

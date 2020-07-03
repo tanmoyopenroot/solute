@@ -6,7 +6,6 @@ export default abstract class BaseElement<T> {
 
   constructor(node: T) {
     this.node = node;
-    this.init();
   }
 
   public abstract generateDelcaration(): BaseNode;
@@ -15,11 +14,6 @@ export default abstract class BaseElement<T> {
 
   protected abstract generateVariable(): void;
   protected abstract attachVariable(): void;
-
-  protected init(): void {
-    this.generateVariable();
-    this.attachVariable();
-  }
 }
 
 export { BaseElement };

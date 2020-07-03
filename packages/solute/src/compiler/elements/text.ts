@@ -10,6 +10,8 @@ export default class TextElement extends BaseElement<BaseNode> {
     super(node);
 
     this.type = 'TextElement';
+    this.generateVariable();
+    this.attachVariable();
   }
 
   protected generateVariable(): void {
