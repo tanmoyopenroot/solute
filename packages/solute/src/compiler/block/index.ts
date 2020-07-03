@@ -106,6 +106,9 @@ export default class Block {
           }
         });
       }
+    } else if (node.type === 'Literal') {
+      const element = new TextElement(node);
+      this.nodeBuilder(element, parent);
     }
   }
 
