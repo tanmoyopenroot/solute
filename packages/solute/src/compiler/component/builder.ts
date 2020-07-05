@@ -26,9 +26,9 @@ export default class Builder {
             options,
             {
               state: getState(),
-              computed: getComputed(this),
-              methods: getMethods(this),
-              watch: getWatchers(this)
+              computed: getComputed(),
+              methods: getMethods(),
+              watch: getWatchers()
             },
             createFragment
           );

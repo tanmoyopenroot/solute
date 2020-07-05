@@ -1,107 +1,63 @@
-import { walk } from 'estree-walker';
-import { BaseNode, ObjectExpression, FunctionExpression, ExportDefaultDeclaration, Expression } from 'estree-jsx';
+import { BaseNode } from 'estree-jsx';
 
 import Block from '../block';
+import Builder from './builder';
+import Extractor from './properties/extractor';
 
-const DEFAULT_NAME = 'Anonymous Component';
-const COMPONENT_PROPERTY = {
-  NAME: 'name',
-  PROPS: 'props',
-  DATA: 'data',
-  COMPUTED: 'computed',
-  WATCH: 'watch',
-  METHODS: 'methods',
-  RENDER: 'render',
-};
+const DEFAULT_NAME = 'AnonymousComponent';
+
 export default class Component {
-  private ast: BaseNode;
-  public name: string;
-  private propsAst: ObjectExpression;
-  private dataAst: ObjectExpression;
-  private computedAst: ObjectExpression;
-  private watchAst: ObjectExpression;
-  private methodsAst: ObjectExpression;
-  private renderAst: FunctionExpression;
-  private chunks: {
-    body: Expression[];
-    state: Expression[];
-    computed: Expression[];
-    methods: Expression[];
-  };
-  constructor(ast: BaseNode) {
-    this.ast = ast;
-    this.name = DEFAULT_NAME;
+  private name: string;
+  private builder: Builder;
+  private extractor: Extractor;
+  private dependencies: Record<string, boolean>;
 
-    this.parserAST();
+  constructor(node: BaseNode) {
+    this.name = DEFAULT_NAME;
+    this.builder = new Builder();
+    this.extractor = new Extractor(node);
+
+    this.generateProperties();
+    this.createFragment();
   }
 
-  private parserAST() {
-    walk(this.ast, {
-      enter: (node) => {
-        if (node.type === 'ExportDefaultDeclaration') {
-          const { declaration } = node as ExportDefaultDeclaration;
+  private setDependencies(dependencies: Record<string, boolean>) {
+    this.dependencies = {
+      ...this.dependencies,
+      ...dependencies,
+    };
+  }
 
-          if (declaration.type === 'ObjectExpression') {
-            declaration.properties.forEach((property) => {
-              if (property.type === 'Property' && property.key.type === 'Identifier') {
-                switch (property.key.name) {
-                  case COMPONENT_PROPERTY.NAME:
-                    if (property.value.type === 'Literal' && typeof property.value.value === 'string') {
-                      this.name = property.value.value;
-                    }
-                    break;
+  private generateProperties() {
+    const data = this.extractor.generateData();
+    this.setDependencies(data.dependencies);
+    this.builder.addToBody(data.node);
 
-                  case COMPONENT_PROPERTY.PROPS:
-                    if (property.value.type === 'ObjectExpression') {
-                      this.propsAst = property.value;
-                    }
+    const computed = this.extractor.generateComputed();
+    this.setDependencies(computed.dependencies);
+    this.builder.addToBody(computed.node);
 
-                    break;
+    const methods = this.extractor.generateMethods(this.dependencies);
+    this.builder.addToBody(methods.node);
 
-                  case COMPONENT_PROPERTY.DATA:
-                    if (property.value.type === 'ObjectExpression') {
-                      this.dataAst = property.value;
-                    }
+    const watch = this.extractor.generateWatch();
+    this.builder.addToBody(watch.node);
+  }
 
-                    break;
+  private createFragment() {
+    const render = this.extractor.getRenderNode();
 
-                  case COMPONENT_PROPERTY.COMPUTED:
-                    if (property.value.type === 'ObjectExpression') {
-                      this.computedAst = property.value;
-                    }
+    if (!render) {
+      return;
+    }
 
-                    break;
-
-                  case COMPONENT_PROPERTY.WATCH:
-                    if (property.value.type === 'ObjectExpression') {
-                      this.watchAst = property.value;
-                    }
-
-                    break;
-
-                  case COMPONENT_PROPERTY.METHODS:
-                    if (property.value.type === 'ObjectExpression') {
-                      this.methodsAst = property.value;
-                    }
-
-                    break;
-
-                  case COMPONENT_PROPERTY.RENDER:
-                    if (property.value.type === 'FunctionExpression') {
-                      this.renderAst = property.value;
-                    }
-
-                    break;
-                }
-              }
-            });
-          }
-        }
-      },
-    });
+    const block = new Block(render).generate('createFragment');
+    this.builder.addToBody(block);
   }
 
   public generate(): BaseNode[] {
-    return new Block(this.renderAst).generate('createFragment');
+    const name = this.extractor.getComponentName() || this.name;
+
+    return this.builder.generate(name);
   }
 }
