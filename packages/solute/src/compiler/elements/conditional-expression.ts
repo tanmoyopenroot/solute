@@ -2,20 +2,21 @@ import { x, b } from 'code-red';
 import { BaseNode, Expression, ConditionalExpression } from 'estree-jsx';
 
 import Block from '../block';
-import BaseExpressionElement from './base-expression-element';
+import Component from '../component';
+import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
-export default class ConditionalExpressionElement extends BaseExpressionElement<ConditionalExpression> {
+export default class ConditionalExpressionElement extends BaseElement<ConditionalExpression> {
   private ifBlockFunction: string;
   private elseBlockFunction: string;
   private variable: string;
 
-  constructor(node: ConditionalExpression) {
-    super(node);
+  constructor(node: ConditionalExpression, component: Component) {
+    super(node, component);
 
-    this.type = 'ConditionalExpressionElement';
     this.generateVariable();
     this.attachVariable();
+    this.generateBody();
   }
 
   protected generateVariable(): void {
@@ -26,16 +27,17 @@ export default class ConditionalExpressionElement extends BaseExpressionElement<
 
   private generateConsequentBlock(): BaseNode[] {
     const { consequent } = this.node;
-    return new Block(consequent).generate(this.ifBlockFunction);
+    return new Block(consequent, this.component).generate(this.ifBlockFunction);
   }
 
   private generateAlternateBlock(): BaseNode[] {
     const { alternate } = this.node;
-    return new Block(alternate).generate(this.elseBlockFunction);
+    return new Block(alternate, this.component).generate(this.elseBlockFunction);
   }
 
-  public generateBody(): BaseNode[] {
-    return [...this.generateConsequentBlock(), ...this.generateAlternateBlock()];
+  private generateBody(): void {
+    this.component.addToBody(this.generateConsequentBlock());
+    this.component.addToBody(this.generateAlternateBlock());
   }
 
   protected attachVariable(): void {

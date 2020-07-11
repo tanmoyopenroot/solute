@@ -1,5 +1,4 @@
 export * from './base-element';
-export * from './base-expression-element';
 export * from './text';
 export * from './tag';
 export * from './logical-expression';

@@ -1,17 +1,17 @@
-import { BaseNode, Expression } from 'estree-jsx';
+import { JSXElement, Expression, BaseNode } from 'estree-jsx';
 import { x, b } from 'code-red';
 
+import Component from '../component';
 import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
-export default class TagElement extends BaseElement<BaseNode> {
+export default class TagElement extends BaseElement<JSXElement> {
   private tag: string;
   private variable: string;
 
-  constructor(node: BaseNode, tag: string) {
-    super(node);
+  constructor(node: JSXElement, component: Component, tag: string) {
+    super(node, component);
 
-    this.type = 'TextElement';
     this.tag = tag;
     this.generateVariable();
     this.attachVariable();

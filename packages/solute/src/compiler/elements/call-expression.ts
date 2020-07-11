@@ -3,21 +3,22 @@ import { x, b } from 'code-red';
 import { BaseNode, Expression, CallExpression, JSXElement, MemberExpression } from 'estree-jsx';
 
 import Block from '../block';
-import BaseExpressionElement from './base-expression-element';
+import Component from '../component';
+import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
-export default class CallExpressionElement extends BaseExpressionElement<CallExpression> {
+export default class CallExpressionElement extends BaseElement<CallExpression> {
   private blockAst: JSXElement;
   private blockFunction: string;
   private variable: string;
 
-  constructor(node: CallExpression) {
-    super(node);
+  constructor(node: CallExpression, component: Component) {
+    super(node, component);
 
-    this.type = 'CallExpressionElement';
     this.generateVariable();
     this.attachVariable();
     this.parserAST();
+    this.generateBody();
   }
 
   protected generateVariable(): void {
@@ -44,12 +45,13 @@ export default class CallExpressionElement extends BaseExpressionElement<CallExp
     });
   }
 
-  public generateBody(): BaseNode[] {
+  private generateBody(): void {
     if (!this.blockAst) {
-      return [];
+      return;
     }
 
-    return new Block(this.blockAst).generate(this.blockFunction);
+    const block = new Block(this.blockAst, this.component).generate(this.blockFunction);
+    this.component.addToBody(block);
   }
 
   public generateDelcaration(): BaseNode {

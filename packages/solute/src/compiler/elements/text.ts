@@ -2,14 +2,14 @@ import { x, b } from 'code-red';
 import { BaseNode, Expression, JSXText } from 'estree-jsx';
 
 import BaseElement from './base-element';
+import Component from '../component';
 import createVariable from '../utils/create-variable';
 export default class TextElement extends BaseElement<BaseNode> {
   private variable: string;
 
-  constructor(node: BaseNode) {
-    super(node);
+  constructor(node: BaseNode, component: Component) {
+    super(node, component);
 
-    this.type = 'TextElement';
     this.generateVariable();
     this.attachVariable();
   }

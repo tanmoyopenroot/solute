@@ -2,19 +2,20 @@ import { x, b } from 'code-red';
 import { BaseNode, Expression, LogicalExpression } from 'estree-jsx';
 
 import Block from '../block';
-import BaseExpressionElement from './base-expression-element';
+import Component from '../component';
+import BaseElement from './base-element';
 import createVariable from '../utils/create-variable';
 
-export default class LogicalExpressionElement extends BaseExpressionElement<LogicalExpression> {
+export default class LogicalExpressionElement extends BaseElement<LogicalExpression> {
   private blockFunction: string;
   private variable: string;
 
-  constructor(node: LogicalExpression) {
-    super(node);
+  constructor(node: LogicalExpression, component: Component) {
+    super(node, component);
 
-    this.type = 'LogicalExpressionElement';
     this.generateVariable();
     this.attachVariable();
+    this.generateBody();
   }
 
   protected generateVariable(): void {
@@ -26,9 +27,11 @@ export default class LogicalExpressionElement extends BaseExpressionElement<Logi
     Reflect.defineProperty(this.node, 'variable', { value: this.variable });
   }
 
-  public generateBody(): BaseNode[] {
+  private generateBody(): void {
     const { right } = this.node;
-    return new Block(right).generate(this.blockFunction);
+    const block = new Block(right, this.component).generate(this.blockFunction);
+
+    this.component.addToBody(block);
   }
 
   public generateDelcaration(): BaseNode {
