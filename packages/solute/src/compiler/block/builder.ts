@@ -10,10 +10,6 @@ export default class Builder {
     this.chunks = new Chunks();
   }
 
-  public addToBody(code: BaseNode[]): void {
-    this.chunks.body.push(...code);
-  }
-
   public addToDeclaration(code: BaseNode): void {
     this.chunks.declarations.push(code);
   }
@@ -28,8 +24,6 @@ export default class Builder {
 
   public generate(name: string): BaseNode[] {
     const block = b`
-      ${this.chunks.body.map((data) => data)}
-
       const ${name} = () => {
         ${this.chunks.declarations.map((data) => data)}
 

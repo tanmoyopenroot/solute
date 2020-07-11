@@ -2,7 +2,6 @@ import { BaseNode, JSXElement, JSXExpressionContainer } from 'estree-jsx';
 
 import {
   BaseElement,
-  BaseExpressionElement,
   TextElement,
   TagElement,
   LogicalExpressionElement,
@@ -10,12 +9,15 @@ import {
   CallExpressionElement,
 } from '../elements';
 import Builder from './builder';
+import Component from '../component';
 
 export default class Block {
   private builder: Builder;
+  private component: Component;
 
-  constructor(node: BaseNode) {
+  constructor(node: BaseNode, component: Component) {
     this.builder = new Builder();
+    this.component = component;
     this.create(node);
   }
 
@@ -29,13 +31,6 @@ export default class Block {
     this.builder.addToMount(mount);
   }
 
-  private expressionBuilder<T>(element: BaseExpressionElement<T>, parent: BaseNode) {
-    const block = element.generateBody();
-
-    this.builder.addToBody(block);
-    this.nodeBuilder(element, parent);
-  }
-
   private create(node: BaseNode, parent?: BaseNode): void {
     if (node.type === 'JSXElement') {
       const {
@@ -44,7 +39,7 @@ export default class Block {
       } = node as JSXElement;
 
       if (name.type === 'JSXIdentifier') {
-        const element = new TagElement(node, name.name);
+        const element = new TagElement(node as JSXElement, this.component, name.name);
         this.nodeBuilder(element, parent);
 
         children.forEach((child) => {
@@ -56,7 +51,7 @@ export default class Block {
             }
 
             case 'JSXText': {
-              const element = new TextElement(child);
+              const element = new TextElement(child, this.component);
               this.nodeBuilder(element, node);
 
               break;
@@ -68,22 +63,22 @@ export default class Block {
               switch (expression.type) {
                 case 'Identifier':
                 case 'MemberExpression': {
-                  const element = new TextElement(expression);
+                  const element = new TextElement(expression, this.component);
                   this.nodeBuilder(element, node);
 
                   break;
                 }
 
                 case 'LogicalExpression': {
-                  const element = new LogicalExpressionElement(expression);
-                  this.expressionBuilder(element, node);
+                  const element = new LogicalExpressionElement(expression, this.component);
+                  this.nodeBuilder(element, node);
 
                   break;
                 }
 
                 case 'ConditionalExpression': {
-                  const element = new ConditionalExpressionElement(expression);
-                  this.expressionBuilder(element, node);
+                  const element = new ConditionalExpressionElement(expression, this.component);
+                  this.nodeBuilder(element, node);
 
                   break;
                 }
@@ -92,8 +87,8 @@ export default class Block {
                   const { callee } = expression;
 
                   if (callee.type === 'MemberExpression') {
-                    const element = new CallExpressionElement(expression);
-                    this.expressionBuilder(element, node);
+                    const element = new CallExpressionElement(expression, this.component);
+                    this.nodeBuilder(element, node);
                   }
 
                   break;
@@ -107,7 +102,7 @@ export default class Block {
         });
       }
     } else if (node.type === 'Literal') {
-      const element = new TextElement(node);
+      const element = new TextElement(node, this.component);
       this.nodeBuilder(element, parent);
     }
   }
