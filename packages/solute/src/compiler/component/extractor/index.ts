@@ -1,10 +1,11 @@
 import { walk } from 'estree-walker';
 import { BaseNode, ExportDefaultDeclaration, Expression, ObjectExpression, Statement } from 'estree-jsx';
 
-import DataProperty from './data';
-import ComputedProperty from './computed';
-import WatchProperty from './watch';
-import MethodsProperty from './methods';
+import DataExtractor from './data';
+import ComputedExtractor from './computed';
+import WatchExtractor from './watch';
+import MethodsExtractor from './methods';
+import { IExtractedDependencies } from '../interfaces';
 
 const COMPONENT_PROPERTY = {
   NAME: 'name',
@@ -136,8 +137,8 @@ export default class Extractor {
     });
   }
 
-  public generateData(): { node: BaseNode[]; dependencies: Record<string, boolean> } {
-    const data = new DataProperty(this.nodes[COMPONENT_PROPERTY.DATA]);
+  public generateData(): { node: BaseNode[]; dependencies: IExtractedDependencies } {
+    const data = new DataExtractor(this.nodes[COMPONENT_PROPERTY.DATA]);
 
     const node = data.generateNode();
     const dependencies = data.getDependencies();
@@ -148,8 +149,8 @@ export default class Extractor {
     };
   }
 
-  public generateComputed(): { node: BaseNode[]; dependencies: Record<string, boolean> } {
-    const data = new ComputedProperty(this.nodes[COMPONENT_PROPERTY.COMPUTED]);
+  public generateComputed(): { node: BaseNode[]; dependencies: IExtractedDependencies } {
+    const data = new ComputedExtractor(this.nodes[COMPONENT_PROPERTY.COMPUTED]);
 
     const node = data.generateNode();
     const dependencies = data.getDependencies();
@@ -161,14 +162,14 @@ export default class Extractor {
   }
 
   public generateMethods(dependencies: Record<string, boolean>): { node: BaseNode[] } {
-    const data = new MethodsProperty(this.nodes[COMPONENT_PROPERTY.METHODS], dependencies);
+    const data = new MethodsExtractor(this.nodes[COMPONENT_PROPERTY.METHODS], dependencies);
     const node = data.generateNode();
 
     return { node };
   }
 
   public generateWatch(): { node: BaseNode[] } {
-    const data = new WatchProperty(this.nodes[COMPONENT_PROPERTY.WATCH]);
+    const data = new WatchExtractor(this.nodes[COMPONENT_PROPERTY.WATCH]);
     const node = data.generateNode();
 
     return { node };

@@ -1,7 +1,7 @@
 import { BaseNode, ObjectExpression } from 'estree-jsx';
 import { b } from 'code-red';
 
-export default class WatchProperty {
+export default class Watch {
   private node: ObjectExpression;
 
   constructor(node: ObjectExpression) {

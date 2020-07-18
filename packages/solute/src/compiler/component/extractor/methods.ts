@@ -2,7 +2,7 @@ import { walk } from 'estree-walker';
 import { BaseNode, ObjectExpression, ExpressionStatement, MemberExpression } from 'estree-jsx';
 import { x, b } from 'code-red';
 
-export default class MethodsProperty {
+export default class Methods {
   private node: ObjectExpression;
 
   constructor(node: ObjectExpression, dependencies: Record<string, boolean>) {

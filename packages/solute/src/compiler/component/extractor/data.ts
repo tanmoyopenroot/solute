@@ -1,13 +1,18 @@
 import { BaseNode, ObjectExpression } from 'estree-jsx';
 import { b } from 'code-red';
 
-export default class DataProperty {
-  private propertyKeys: Record<string, boolean>;
+import { IExtractedDependencies } from '../interfaces';
+
+export default class Data {
+  private dependencies: IExtractedDependencies;
   private node: ObjectExpression;
 
   constructor(node: ObjectExpression) {
     this.node = node;
-    this.propertyKeys = {};
+    this.dependencies = {
+      type: 'data',
+      properties: {},
+    };
 
     if (this.node) {
       this.parseNode();
@@ -19,7 +24,7 @@ export default class DataProperty {
 
     properties.forEach((property) => {
       if (property.type === 'Property' && property.key.type === 'Identifier') {
-        this.propertyKeys[property.key.name] = true;
+        this.dependencies.properties[property.key.name] = [];
       }
     });
   }
@@ -32,7 +37,7 @@ export default class DataProperty {
     `;
   }
 
-  public getDependencies(): Record<string, boolean> {
-    return this.propertyKeys;
+  public getDependencies(): IExtractedDependencies {
+    return this.dependencies;
   }
 }
