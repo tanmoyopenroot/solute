@@ -2,10 +2,10 @@ import { walk } from 'estree-walker';
 import { x, b } from 'code-red';
 import { BaseNode, Expression, CallExpression, JSXElement, MemberExpression } from 'estree-jsx';
 
-import Block from '../block';
-import Component from '../component';
-import BaseElement from './base-element';
-import createVariable from '../utils/create-variable';
+import Block from '../../block';
+import Component from '../../component';
+import BaseElement from './../base-element';
+import createVariable from '../../utils/create-variable';
 
 export default class CallExpressionElement extends BaseElement<CallExpression> {
   private blockAst: JSXElement;

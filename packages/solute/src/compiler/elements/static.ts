@@ -1,13 +1,13 @@
 import { x, b } from 'code-red';
-import { BaseNode, Expression, JSXText } from 'estree-jsx';
+import { BaseNode, Expression, JSXText, Literal } from 'estree-jsx';
 
 import BaseElement from './base-element';
 import Component from '../component';
 import createVariable from '../utils/create-variable';
-export default class TextElement extends BaseElement<BaseNode> {
+export default class StaticElement extends BaseElement<JSXText | Literal> {
   private variable: string;
 
-  constructor(node: BaseNode, component: Component) {
+  constructor(node: JSXText | Literal, component: Component) {
     super(node, component);
 
     this.generateVariable();
@@ -28,11 +28,7 @@ export default class TextElement extends BaseElement<BaseNode> {
   }
 
   public generateCreate(): BaseNode[] {
-    if (this.node.type === 'JSXText') {
-      return b`${this.variable} = text('${(this.node as JSXText).raw}')`;
-    }
-
-    return b`${this.variable} = text(${this.node})`;
+    return b`${this.variable} = text('${(this.node as JSXText).raw}')`;
   }
 
   public generateMount(parent?: BaseNode): Expression {
@@ -41,4 +37,4 @@ export default class TextElement extends BaseElement<BaseNode> {
   }
 }
 
-export { TextElement };
+export { StaticElement };

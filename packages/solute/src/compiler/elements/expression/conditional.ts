@@ -1,10 +1,10 @@
 import { x, b } from 'code-red';
 import { BaseNode, Expression, ConditionalExpression } from 'estree-jsx';
 
-import Block from '../block';
-import Component from '../component';
-import BaseElement from './base-element';
-import createVariable from '../utils/create-variable';
+import Block from '../../block';
+import Component from '../../component';
+import BaseElement from './../base-element';
+import createVariable from '../../utils/create-variable';
 
 export default class ConditionalExpressionElement extends BaseElement<ConditionalExpression> {
   private ifBlockFunction: string;

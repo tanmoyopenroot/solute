@@ -13,6 +13,10 @@ export default abstract class BaseElement<T> {
   public abstract generateDelcaration(): BaseNode;
   public abstract generateCreate(): BaseNode[];
   public abstract generateMount(parent?: BaseNode): Expression;
+
+  public generateUpdate(): BaseNode[] | null {
+    return null;
+  }
 }
 
 export { BaseElement };
