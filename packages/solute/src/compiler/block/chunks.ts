@@ -4,7 +4,7 @@ export default class Chunks {
   public declarations: BaseNode[];
   public create: BaseNode[];
   public mount: Expression[];
-  public update: Expression[];
+  public update: BaseNode[];
   public destroy: Expression[];
 
   constructor() {

@@ -1,12 +1,13 @@
-import { BaseNode, JSXElement, JSXExpressionContainer } from 'estree-jsx';
+import { BaseNode, JSXElement, JSXExpressionContainer, Literal } from 'estree-jsx';
 
 import {
   BaseElement,
-  TextElement,
+  StaticElement,
   TagElement,
   LogicalExpressionElement,
   ConditionalExpressionElement,
   CallExpressionElement,
+  TextExpressionElement,
 } from '../elements';
 import Builder from './builder';
 import Component from '../component';
@@ -23,12 +24,19 @@ export default class Block {
 
   private nodeBuilder<T>(element: BaseElement<T>, parent: BaseNode) {
     const declarations = element.generateDelcaration();
-    const create = element.generateCreate();
-    const mount = element.generateMount(parent);
-
     this.builder.addToDeclaration(declarations);
+
+    const create = element.generateCreate();
     this.builder.addToCreate(create);
+
+    const mount = element.generateMount(parent);
     this.builder.addToMount(mount);
+
+    const update = element.generateUpdate();
+
+    if (update) {
+      this.builder.addToUpdate(update);
+    }
   }
 
   private create(node: BaseNode, parent?: BaseNode): void {
@@ -51,7 +59,7 @@ export default class Block {
             }
 
             case 'JSXText': {
-              const element = new TextElement(child, this.component);
+              const element = new StaticElement(child, this.component);
               this.nodeBuilder(element, node);
 
               break;
@@ -63,7 +71,7 @@ export default class Block {
               switch (expression.type) {
                 case 'Identifier':
                 case 'MemberExpression': {
-                  const element = new TextElement(expression, this.component);
+                  const element = new TextExpressionElement(expression, this.component);
                   this.nodeBuilder(element, node);
 
                   break;
@@ -102,7 +110,7 @@ export default class Block {
         });
       }
     } else if (node.type === 'Literal') {
-      const element = new TextElement(node, this.component);
+      const element = new StaticElement(node as Literal, this.component);
       this.nodeBuilder(element, parent);
     }
   }

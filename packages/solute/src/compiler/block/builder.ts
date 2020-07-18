@@ -22,6 +22,10 @@ export default class Builder {
     this.chunks.mount.push(code);
   }
 
+  public addToUpdate(code: BaseNode[]): void {
+    this.chunks.update.push(...code);
+  }
+
   public generate(name: string): BaseNode[] {
     const block = b`
       const ${name} = () => {
@@ -34,6 +38,9 @@ export default class Builder {
           mount() {
             ${this.chunks.mount.map((data) => data)}
           },
+          update(dirty) {
+            ${this.chunks.update.map((data) => data)}
+          }
         }
       };
     `;
