@@ -2,8 +2,9 @@ import { BaseNode } from 'estree-jsx';
 
 import Block from '../block';
 import Builder from './builder';
-import Extractor from './properties/extractor';
-import { Dependencies } from '../interfaces';
+import Extractor from './extractor';
+import Dependency from './dependency';
+import { IExtractedDependencies } from './interfaces';
 
 const DEFAULT_NAME = 'AnonymousComponent';
 
@@ -11,14 +12,10 @@ export default class Component {
   private name: string;
   private builder: Builder;
   private extractor: Extractor;
-  private dependencies: Dependencies;
+  private dependencies: Dependency;
 
   constructor(node: BaseNode) {
     this.name = DEFAULT_NAME;
-    this.dependencies = {
-      data: {},
-      computed: {},
-    };
 
     this.builder = new Builder();
     this.extractor = new Extractor(node);
@@ -28,9 +25,8 @@ export default class Component {
     this.createFragment();
   }
 
-  private setDependencies(dataDependencies: Record<string, boolean>, computedDependencies: Record<string, boolean>) {
-    this.dependencies.data = dataDependencies;
-    this.dependencies.computed = computedDependencies;
+  private setDependencies(dataDependencies: IExtractedDependencies, computedDependencies: IExtractedDependencies) {
+    this.dependencies = new Dependency([dataDependencies, computedDependencies]);
   }
 
   private generateReactiveProperties() {
@@ -44,10 +40,7 @@ export default class Component {
   }
 
   private generateOtherProperties() {
-    const methods = this.extractor.generateMethods({
-      ...this.dependencies.data,
-      ...this.dependencies.computed,
-    });
+    const methods = this.extractor.generateMethods(this.dependencies.get());
 
     this.addToBody(methods.node);
 
@@ -66,8 +59,8 @@ export default class Component {
     this.addToBody(block);
   }
 
-  public getDependencies(): Dependencies {
-    return this.dependencies;
+  public getDependencies(): Record<string, boolean> {
+    return this.dependencies.get();
   }
 
   public addToBody(node: BaseNode | BaseNode[]): void {
